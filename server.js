@@ -4,11 +4,11 @@ const cors = require('cors');
 
 const app = express();
 
-// Middleware
+// 🔧 Middleware
 app.use(cors());
 app.use(express.json());
 
-// 🔐 Use ENV variable (IMPORTANT for cloud)
+// 🔐 ENV Mongo URI
 const mongoURI = process.env.MONGO_URI;
 
 // 🧠 Schema
@@ -52,19 +52,21 @@ app.delete('/pets/:id', async (req, res) => {
   }
 });
 
-// ❤️ Health check (VERY useful for Render)
+// ❤️ Health route
 app.get('/', (req, res) => {
   res.send("🚀 Pet API is running");
 });
 
-// 🚀 Start Server AFTER DB connects
+// 🚀 Start server AFTER DB connects
 async function start() {
   try {
     await mongoose.connect(mongoURI);
     console.log("✅ MongoDB Connected");
 
-    app.listen(3000, () => {
-      console.log("🚀 Server running on port 3000");
+    const PORT = process.env.PORT || 3000;
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
     });
 
   } catch (err) {
