@@ -8,8 +8,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔗 MongoDB Connection String
-const mongoURI = "mongodb://siyamishra15:akshay2005@ac-ejj9k8t-shard-00-00.9epyd5x.mongodb.net:27017,ac-ejj9k8t-shard-00-01.9epyd5x.mongodb.net:27017,ac-ejj9k8t-shard-00-02.9epyd5x.mongodb.net:27017/petDB?ssl=true&replicaSet=atlas-uubokv-shard-0&authSource=admin&retryWrites=true&w=majority";
+// 🔐 Use ENV variable (IMPORTANT for cloud)
+const mongoURI = process.env.MONGO_URI;
 
 // 🧠 Schema
 const PetSchema = new mongoose.Schema({
@@ -42,14 +42,19 @@ app.post('/pets', async (req, res) => {
   }
 });
 
-// ❌ DELETE pet (CORRECT PLACE)
+// ❌ DELETE pet
 app.delete('/pets/:id', async (req, res) => {
   try {
     await Pet.findByIdAndDelete(req.params.id);
-    res.json({ message: "Deleted" });
+    res.json({ message: "Deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// ❤️ Health check (VERY useful for Render)
+app.get('/', (req, res) => {
+  res.send("🚀 Pet API is running");
 });
 
 // 🚀 Start Server AFTER DB connects
