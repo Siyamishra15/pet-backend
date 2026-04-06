@@ -5,8 +5,14 @@ require('dotenv').config();
 
 const app = express();
 
-// 🔧 Middleware
-app.use(cors());
+// ✅ FIX 1: Proper CORS (VERY IMPORTANT for Netlify)
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "DELETE"],
+  allowedHeaders: ["Content-Type"]
+}));
+
+// ✅ FIX 2: Ensure JSON parsing BEFORE routes
 app.use(express.json());
 
 // 🔐 Mongo URI
@@ -30,7 +36,7 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true // 🚨 prevents duplicate users
+    unique: true
   },
   password: {
     type: String,
@@ -44,7 +50,6 @@ const User = mongoose.model("User", UserSchema);
 // 📥 PET ROUTES
 // =======================
 
-// GET pets
 app.get('/pets', async (req, res) => {
   try {
     const pets = await Pet.find();
@@ -54,7 +59,6 @@ app.get('/pets', async (req, res) => {
   }
 });
 
-// ADD pet
 app.post('/pets', async (req, res) => {
   try {
     const newPet = new Pet(req.body);
@@ -65,7 +69,6 @@ app.post('/pets', async (req, res) => {
   }
 });
 
-// DELETE pet
 app.delete('/pets/:id', async (req, res) => {
   try {
     await Pet.findByIdAndDelete(req.params.id);
@@ -82,14 +85,14 @@ app.delete('/pets/:id', async (req, res) => {
 // ✅ REGISTER
 app.post('/register', async (req, res) => {
   try {
+    console.log("REQ BODY:", req.body); // 🔥 DEBUG
+
     const { email, password } = req.body;
 
-    // 🚨 Validation
     if (!email || !password) {
       return res.status(400).json({ message: "All fields required" });
     }
 
-    // 🚨 Check existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -110,7 +113,6 @@ app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 🚨 Validation
     if (!email || !password) {
       return res.status(400).json({ message: "All fields required" });
     }
